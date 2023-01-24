@@ -174,7 +174,9 @@ public class Scanner {
 
     private bool match(char expected) {
         if (isAtEnd()) return false;
-        if (source[current] != expected) current++; return true;
+        if (source[current] != expected) return false;
+        current++;
+        return true;
     }
 
     private char peek() {
