@@ -34,7 +34,6 @@ public class Lox {
         catch (Exception e) {
             throw new Exception(String.Format($"Could not open {e}"));
         }
-        Console.WriteLine(input_str);
         Run(input_str);
 
         if (hadError) Environment.Exit(1); //TODO: give that int some info.
@@ -49,7 +48,6 @@ public class Lox {
             if (line == "") {
                 break;
             }
-            Console.WriteLine(line);
             Run(line);
             hadError = false; //BOOOOOOOOOO
         }
@@ -60,12 +58,12 @@ public class Lox {
         List<Token> tokens = scanner.scanTokens();
 
         foreach (Token token in tokens) {
-            Console.Write(token);
+            Console.WriteLine($"{token.lexeme} : {token.type}");
         }
     }
 
     //TODO: build an actual ErrorReporter
-    static void error(int line, String message) {
+    public static void error(int line, String message) {
         report(line, "", message);
     }
 

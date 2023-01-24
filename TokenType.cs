@@ -4,7 +4,7 @@ using System;
 namespace capers;
 
 public enum TokenType {
-    //Single char tokens.
+    //Single char tokens
     LEFT_PAREN,
     RIGHT_PAREN,
     LEFT_BRACE,
@@ -17,7 +17,7 @@ public enum TokenType {
     SLASH,
     STAR,
 
-    //One or two char tokens.
+    //One or two char tokens
     BANG,
     BANG_EQUAL,
     EQUAL,
@@ -27,12 +27,12 @@ public enum TokenType {
     LESS,
     LESS_EQUAL,
 
-    //Literals.
+    //Literals
     IDENTIFIER,
     STRING,
     NUMBER,
 
-    //Keywords.
+    //Keywords
     AND,
     CLASS,
     ELSE,

@@ -3,20 +3,20 @@ using System;
 
 namespace capers;
 
-class Token {
-    private TokenType type;
-    private string lexeme;
-    private object literal; //TODO: change 'Object'
-    private int line;
+public class Token {
+    public TokenType type;
+    public String lexeme;
+    public object literal; //TODO: change 'Object'
+    public int line;
 
-    Token(TokenType type, string lexeme, object literal, int line) {
+    public Token(TokenType type, String lexeme, object literal, int line) {
         this.type = type;
         this.lexeme = lexeme;
         this.literal = literal;
         this.line = line;
     }
 
-    public string toString() {
+    public String toString() {
         return $"{type} {lexeme} {literal}";
     }
 }
