@@ -9,22 +9,33 @@ public class Lox {
 
     public static void Main(string[] args) {
         switch (args.Length) {
-        case > 1:
-            throw new ArgumentException(String.Format(
-                        "Please provide one argument instead of {0}.",
-                        args.Length));
-        case 1:
-            RunFile(args[0]);
-            break;
+            case > 1:
+                throw new ArgumentException(String.Format(
+                            "Please provide one argument instead of {0}.",
+                            args.Length));
+            case 1:
+                RunFile(args[0]);
+                break;
 
-        case 0:
-            RunPrompt();
-            break;
+            case 0:
+                RunPrompt();
+                break;
 
-        default:
-           throw new ArgumentException(String.Format("Something went really wrong. {0}", args.Length));
+            default:
+                throw new ArgumentException(String.Format("Something went really wrong. {0}", args.Length));
         }
+        //TEMP CODE
+        Expr expression = new Binary(
+                new Unary(
+                    new Token(TokenType.MINUS, "-", null, 1),
+                    new Literal(123)),
+                new Token(TokenType.STAR, "*", null, 1),
+                new Grouping(
+                    new Literal(45.67)));
+
+        Console.WriteLine(new PrettyPrinter().print(expression));
     }
+
 
     private static void RunFile(string file) {
         string input_str;
@@ -58,7 +69,7 @@ public class Lox {
         List<Token> tokens = scanner.scanTokens();
 
         foreach (Token token in tokens) {
-            Console.WriteLine($"{token.lexeme} : {token.type}");
+            Console.WriteLine($"{token.lexeme} : {token.type}, {token.literal} @ {token.line}");
         }
     }
 

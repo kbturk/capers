@@ -105,7 +105,7 @@ public class Scanner {
         advance();
 
         //trim the surrounding quotes
-        String value = source.Substring(start + 1, current - 1 - start);
+        String value = source.Substring(start + 1, current - 2 - start);
         addToken(TokenType.STRING, value);
     }
 
