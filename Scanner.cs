@@ -83,7 +83,7 @@ public class Scanner {
                       } else if (isAlpha(c)) {
                           identifier();
                       } else {
-                          Lox.error(line, $"Unexpected character. {c}");
+                          Capers.error(line, $"Unexpected character. {c}");
                       }
                       break;
         }
@@ -97,7 +97,7 @@ public class Scanner {
 
         //handle the case of running off the end w/o a closing '"'
         if (isAtEnd()) {
-            Lox.error(line, "Unterminated string.");
+            Capers.error(line, "Unterminated string.");
             return;
         }
 

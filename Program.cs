@@ -4,7 +4,7 @@ using System;
 
 namespace capers;
 
-public class Lox {
+public class Capers {
     public static bool hadError = false;
 
     public static void Main(string[] args) {
@@ -24,16 +24,15 @@ public class Lox {
             default:
                 throw new ArgumentException(String.Format("Something went really wrong. {0}", args.Length));
         }
-        //TEMP CODE
-        Expr expression = new Binary(
-                new Unary(
-                    new Token(TokenType.MINUS, "-", null, 1),
-                    new Literal(123)),
-                new Token(TokenType.STAR, "*", null, 1),
-                new Grouping(
-                    new Literal(45.67)));
+        //TEMP CODE Showing Expr and pretty printer's capabilities
+       //Expr expression = new Binary(
+               //new Unary(
+                   //new Token(TokenType.MINUS, "-", null, 1),
+                   //new Literal(123)),
+               //new Token(TokenType.STAR, "*", null, 1),
+               //new Grouping(
+                   //new Literal(45.67)));
 
-        Console.WriteLine(new PrettyPrinter().print(expression));
     }
 
 
@@ -45,7 +44,9 @@ public class Lox {
         catch (Exception e) {
             throw new Exception(String.Format($"Could not open {e}"));
         }
-        Run(input_str);
+        foreach (string line in input_str.Split('\n')) {
+            Run(line);
+        }
 
         if (hadError) Environment.Exit(1); //TODO: give that int some info.
     }
@@ -68,9 +69,16 @@ public class Lox {
         Scanner scanner = new Scanner (str);
         List<Token> tokens = scanner.scanTokens();
 
-        foreach (Token token in tokens) {
-            Console.WriteLine($"{token.lexeme} : {token.type}, {token.literal} @ {token.line}");
-        }
+        Parser parser = new Parser(tokens);
+        Expr expression = parser.parse();
+
+        //Stop if there was a syntax error
+        if (hadError) return;
+
+        //foreach (Token token in tokens) {
+        //Console.WriteLine($"{token.lexeme} : {token.type}, {token.literal} @ {token.line}");
+        //}
+        Console.WriteLine(new PrettyPrinter().print(expression));
     }
 
     //TODO: build an actual ErrorReporter
@@ -78,8 +86,17 @@ public class Lox {
         report(line, "", message);
     }
 
+    public static void error(Token token, string message) {
+        if (token.type == TokenType.EOF) {
+            report(token.line, "at end", message);
+        } else {
+            report(token.line, $" at '{token.lexeme}'", message);
+        }
+    }
+
     private static void report(int line, String where, String message) {
         Console.Error.WriteLine($"[line {line}] Error {where}: {message}");
         hadError = true;
     }
+
 }
