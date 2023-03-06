@@ -57,10 +57,19 @@ public class Interpreter: Visitor<object> {
                 if (left is string && right is string) {
                     return (string)left + (string) right;
                 }
+                if (left is string && right is double) {
+                    return (string)left + (string)right.ToString();
+                }
+                if (left is double && right is string) {
+                    return (string)left.ToString() + (string)right;
+                }
                 throw new RuntimeError(expr.oper,
-                        "Operands must be two numbers or two strings.");
+                        "Operands must be numbers or strings.");
             case TokenType.SLASH:
                 checkNumberOperand(expr.oper, left, right);
+                if (right is double && Convert.ToDouble(right) == 0) {
+                    throw new RuntimeError(expr.oper, "Cannot divide by 0");
+                }
                 return (double)left / (double)right;
             case TokenType.STAR:
                 if (left is string | right is string) {
@@ -119,7 +128,7 @@ public class Interpreter: Visitor<object> {
         if (obj is double) {
             string text = obj.ToString();
             //TODO: This is Java's syntax for inter-valued doubles.
-            //Look up C#'s equivalent
+            //Double check C#'s equivalent
             if (text.EndsWith(".0")) {
                 text = text.Substring(0, text.Length - 2);
             }

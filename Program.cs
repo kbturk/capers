@@ -27,15 +27,6 @@ public class Capers {
                 throw new ArgumentException(String.Format("Something went really wrong. {0}", args.Length));
         }
 
-        //TEMP CODE Showing Expr and pretty printer's capabilities
-       //Expr expression = new Binary(
-               //new Unary(
-                   //new Token(TokenType.MINUS, "-", null, 1),
-                   //new Literal(123)),
-               //new Token(TokenType.STAR, "*", null, 1),
-               //new Grouping(
-                   //new Literal(45.67)));
-
     }
 
 
@@ -80,14 +71,9 @@ public class Capers {
         //Stop if there was a syntax error
         if (hadError) return;
 
-        //foreach (Token token in tokens) {
-        //Console.WriteLine($"{token.lexeme} : {token.type}, {token.literal} @ {token.line}");
-        //}
-        //Console.WriteLine(new PrettyPrinter().print(expression));
         interpreter.interpret(expression);
     }
 
-    //TODO: build an actual ErrorReporter
     public static void error(int line, String message) {
         report(line, "", message);
     }
