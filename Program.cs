@@ -5,7 +5,9 @@ using System;
 namespace capers;
 
 public class Capers {
+    public static Interpreter interpreter = new Interpreter();
     public static bool hadError = false;
+    public static bool hadRuntimeError = false;
 
     public static void Main(string[] args) {
         switch (args.Length) {
@@ -24,6 +26,7 @@ public class Capers {
             default:
                 throw new ArgumentException(String.Format("Something went really wrong. {0}", args.Length));
         }
+
         //TEMP CODE Showing Expr and pretty printer's capabilities
        //Expr expression = new Binary(
                //new Unary(
@@ -48,7 +51,9 @@ public class Capers {
             Run(line);
         }
 
-        if (hadError) Environment.Exit(1); //TODO: give that int some info.
+        //TODO: give that int some info.
+        if (hadError) Environment.Exit(1);
+        if (hadRuntimeError) Environment.Exit(70);
     }
 
     private static void RunPrompt() {
@@ -78,7 +83,8 @@ public class Capers {
         //foreach (Token token in tokens) {
         //Console.WriteLine($"{token.lexeme} : {token.type}, {token.literal} @ {token.line}");
         //}
-        Console.WriteLine(new PrettyPrinter().print(expression));
+        //Console.WriteLine(new PrettyPrinter().print(expression));
+        interpreter.interpret(expression);
     }
 
     //TODO: build an actual ErrorReporter
@@ -92,6 +98,11 @@ public class Capers {
         } else {
             report(token.line, $" at '{token.lexeme}'", message);
         }
+    }
+
+    public static void runtimeError(RuntimeError error) {
+        Console.Error.WriteLine($"{error.Message} {error.message}\n[line {error.token.line}]");
+        hadRuntimeError = true;
     }
 
     private static void report(int line, String where, String message) {

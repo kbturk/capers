@@ -1,6 +1,5 @@
 namespace capers;
 
-//big man on campus
 public class Parser {
     private List<Token> tokens;
     private int current = 0;
@@ -167,19 +166,12 @@ public class Parser {
 
             switch (peek().type) {
                 case TokenType.CLASS:
-                    break;
                 case TokenType.FUNCT:
-                    break;
                 case TokenType.VAR:
-                    break;
                 case TokenType.FOR:
-                    break;
                 case TokenType.IF:
-                    break;
                 case TokenType.WHILE:
-                    break;
                 case TokenType.PRINT:
-                    break;
                 case TokenType.RETURN:
                     return;
             }
