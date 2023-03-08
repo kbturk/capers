@@ -32,6 +32,10 @@ public class PrettyPrinter: VisitorExpr<string> {
         return expr.name.lexeme; 
     }
 
+    public string VisitAssign(Assign expr) {
+        return expr.name.lexeme;
+    }
+
     public string parenthesize(string name, params Expr[] exprs) {
         StringBuilder builder = new StringBuilder();
 

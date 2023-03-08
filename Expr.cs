@@ -4,6 +4,7 @@ using System;
 namespace capers;
 
 public interface VisitorExpr<T> {
+    public T VisitAssign(Assign e);
     public T VisitBinary(Binary e);
     public T VisitGrouping(Grouping e);
     public T VisitLiteral(Literal e);
@@ -13,6 +14,21 @@ public interface VisitorExpr<T> {
 
 public abstract class Expr {
     public abstract T Accept<T>(VisitorExpr<T> visitor);
+}
+
+public class Assign: Expr {
+    public Token name;
+    public Expr value;
+
+
+    public Assign(Token name, Expr value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    public override T Accept<T>(VisitorExpr<T> visitor) {
+      return visitor.VisitAssign(this);
+    }
 }
 
 public class Binary: Expr {

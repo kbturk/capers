@@ -19,8 +19,10 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         }
     }
 
-    public object VisitLiteral(Literal expr) {
-        return expr.value;
+    public object VisitAssign(Assign expr) {
+        object val = evaluate(expr.value);
+        environment.assign(expr.name, val);
+        return val;
     }
 
     public object VisitBinary(Binary expr) {
@@ -93,6 +95,10 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return evaluate(expr.expression);
     }
 
+    public object VisitLiteral(Literal expr) {
+        return expr.value;
+    }
+
     public object VisitUnary(Unary expr) {
         object right = evaluate(expr.right);
 
@@ -109,6 +115,10 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         //Should be unreachable...
         throw new RuntimeError(expr.oper, "Reached an unreachable condition in Interpreter.VisitUnary");
         return null;
+    }
+
+    public object VisitVariable(Variable expr) {
+        return environment.get(expr.name);
     }
 
     public bool? VisitExpression(Expression stmt) {
@@ -130,10 +140,6 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
         environment.define(stmt.name.lexeme, val);
         return null;
-    }
-
-    public object VisitVariable(Variable expr) {
-        return environment.get(expr.name);
     }
 
     //helper functions

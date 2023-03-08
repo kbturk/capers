@@ -20,7 +20,7 @@ public class Parser {
 
     private Expr expression() {
 
-        return equality();
+        return assignment();
     }
 
     private Stmt declaration() {
@@ -76,6 +76,24 @@ public class Parser {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new Expression(expr);
+    }
+
+    private Expr assignment() {
+        Expr expr = equality();
+
+        if (b_match(TokenType.EQUAL)) {
+            Token equals = previous();
+            Expr val = assignment();
+
+            if (expr is Variable) {
+                Token name = ((Variable)expr).name;
+                return new Assign(name, val);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     private Expr comparison() {
