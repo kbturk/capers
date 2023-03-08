@@ -6,7 +6,8 @@ namespace capers;
 public interface VisitorStmt<T> {
     public T VisitExpression(Expression e);
     public T VisitPrint(Print e);
-}
+    public T VisitVar(Var e);
+  }
 
 public abstract class Stmt {
     public abstract T Accept<T>(VisitorStmt<T> visitor);
@@ -15,24 +16,41 @@ public abstract class Stmt {
 public class Expression: Stmt {
     public Expr expression;
 
+
     public Expression(Expr expression) {
-        this.expression = expression;
+      this.expression = expression;
     }
 
     public override T Accept<T>(VisitorStmt<T> visitor) {
-        return visitor.VisitExpression(this);
+      return visitor.VisitExpression(this);
     }
 }
 
 public class Print: Stmt {
     public Expr expression;
 
+
     public Print(Expr expression) {
-        this.expression = expression;
+      this.expression = expression;
     }
 
     public override T Accept<T>(VisitorStmt<T> visitor) {
-        return visitor.VisitPrint(this);
+      return visitor.VisitPrint(this);
+    }
+}
+
+public class Var: Stmt {
+    public Token name;
+    public Expr initializer;
+
+
+    public Var(Token name, Expr initializer) {
+      this.name = name;
+      this.initializer = initializer;
+    }
+
+    public override T Accept<T>(VisitorStmt<T> visitor) {
+      return visitor.VisitVar(this);
     }
 }
 

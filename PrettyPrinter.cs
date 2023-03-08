@@ -5,7 +5,7 @@ using System;
 
 namespace capers;
 
-public class PrettyPrinter: Visitor<string> {
+public class PrettyPrinter: VisitorExpr<string> {
     public string print(Expr expr) {
         return expr.Accept(this);
     }

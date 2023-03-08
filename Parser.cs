@@ -5,22 +5,52 @@ public class Parser {
     private int current = 0;
     private class ParseError:Exception {}
 
-    //surely there's a better way to do this.
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
-    public Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    public List<Stmt> parse() {
+        List<Stmt> statements = new List<Stmt>();
+        while (!isAtEnd()) {
+            statements.Add(declaration());
         }
+
+        return statements;
     }
 
     private Expr expression() {
 
         return equality();
+    }
+
+    private Stmt declaration() {
+        try {
+            if (b_match(TokenType.VAR)) return varDeclaration();
+
+            return statement();
+        } catch (ParseError error) {
+            syncronize();
+            return null;
+        }
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (b_match(TokenType.EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        return new Var(name, initializer);
+    }
+
+    //Statement code
+    private Stmt statement() {
+        if (b_match(TokenType.PRINT)) return printStatement();
+
+        return expressionStatement();
     }
 
     private Expr equality() {
@@ -34,6 +64,18 @@ public class Parser {
         }
 
         return expr;
+    }
+
+    private Stmt printStatement() {
+        Expr val = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Print(val);
+    }
+
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new Expression(expr);
     }
 
     private Expr comparison() {
@@ -102,6 +144,8 @@ public class Parser {
             case TokenType.STRING:
                 advance();
                 return new Literal(previous().literal);
+            case TokenType.IDENTIFIER:
+                return new Variable(previous());
             case TokenType.LEFT_PAREN:
                 advance();
                 Expr expr = expression();

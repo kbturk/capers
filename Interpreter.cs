@@ -3,13 +3,14 @@ using System;
 
 namespace capers;
 
-public class Interpreter: Visitor<object> {
+public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
     //Main API to Interpreter interface (ch 7.4)
-    public void interpret(Expr expression) {
+    public void interpret(List<Stmt> statements) {
         try {
-            object value = evaluate(expression);
-            Console.WriteLine(stringify(value));
+            foreach (Stmt statement in statements) {
+                execute(statement);
+            }
         } catch (RuntimeError error) {
             Capers.runtimeError(error);
         }
@@ -107,6 +108,17 @@ public class Interpreter: Visitor<object> {
         return null;
     }
 
+    public bool? VisitExpression(Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    public bool? VisitPrint(Print stmt) {
+        object val = evaluate(stmt.expression);
+        Console.WriteLine(stringify(val));
+        return null;
+    }
+
     //helper functions
     private void checkNumberOperand(Token oper, object operand) {
         if (operand is double) return;
@@ -122,6 +134,11 @@ public class Interpreter: Visitor<object> {
         return expr.Accept(this);
     }
 
+    private void execute(Stmt stmt) {
+        stmt.Accept(this);
+    }
+
+    //Some goofy string concatinations
     private string stringify(object obj) {
         if (obj == null) return "nil";
 
