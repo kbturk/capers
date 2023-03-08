@@ -29,7 +29,7 @@ public class Parser {
 
             return statement();
         } catch (ParseError error) {
-            syncronize();
+            synchronize();
             return null;
         }
     }
@@ -145,6 +145,7 @@ public class Parser {
                 advance();
                 return new Literal(previous().literal);
             case TokenType.IDENTIFIER:
+                advance();
                 return new Variable(previous());
             case TokenType.LEFT_PAREN:
                 advance();

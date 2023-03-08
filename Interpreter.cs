@@ -5,6 +5,9 @@ namespace capers;
 
 public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
+    //a dictionary to hold variables
+    private VarEnvironment environment = new VarEnvironment();
+
     //Main API to Interpreter interface (ch 7.4)
     public void interpret(List<Stmt> statements) {
         try {
@@ -117,6 +120,20 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         object val = evaluate(stmt.expression);
         Console.WriteLine(stringify(val));
         return null;
+    }
+
+    public bool? VisitVar(Var stmt) {
+        object val = null;
+        if (stmt.initializer != null) {
+            val = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, val);
+        return null;
+    }
+
+    public object VisitVariable(Variable expr) {
+        return environment.get(expr.name);
     }
 
     //helper functions
