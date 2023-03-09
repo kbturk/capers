@@ -38,9 +38,9 @@ public class Capers {
         catch (Exception e) {
             throw new Exception(String.Format($"Could not open {e}"));
         }
-        foreach (string line in input_str.Split('\n')) {
-            Run(line);
-        }
+        //foreach (string line in input_str.Split('\n')) {
+            Run(input_str);
+        //}
 
         //TODO: give that int some info.
         if (hadError) Environment.Exit(1);

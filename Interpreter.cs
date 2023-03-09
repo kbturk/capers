@@ -121,6 +121,11 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return environment.get(expr.name);
     }
 
+    public bool? VisitBlock(Block stmt) {
+        executeBlock(stmt.statements, new VarEnvironment(environment));
+        return null;
+    }
+
     public bool? VisitExpression(Expression stmt) {
         evaluate(stmt.expression);
         return null;
@@ -159,6 +164,19 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
     private void execute(Stmt stmt) {
         stmt.Accept(this);
+    }
+
+    public void executeBlock(List<Stmt> statements, VarEnvironment environment) {
+        VarEnvironment previous = this.environment;
+        try {
+            this.environment = environment;
+
+            foreach (Stmt statement in statements) {
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
     }
 
     //Some goofy string concatinations

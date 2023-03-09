@@ -68,10 +68,9 @@ public class Scanner {
             case '\r':
             case '\t':
                       break;
-
             //advance line char
             case '\n':
-                      line++;
+                      this.line++;
                       break;
 
             //string literals with yet another helper function
@@ -91,7 +90,7 @@ public class Scanner {
 
     private void isString() {
         while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') line++;
+            if (peek() == '\n') this.line++;
             advance();
         }
 

@@ -4,6 +4,7 @@ using System;
 namespace capers;
 
 public interface VisitorStmt<T> {
+    public T VisitBlock(Block e);
     public T VisitExpression(Expression e);
     public T VisitPrint(Print e);
     public T VisitVar(Var e);
@@ -11,6 +12,19 @@ public interface VisitorStmt<T> {
 
 public abstract class Stmt {
     public abstract T Accept<T>(VisitorStmt<T> visitor);
+}
+
+public class Block: Stmt {
+    public List<Stmt> statements;
+
+
+    public Block(List<Stmt> statements) {
+      this.statements = statements;
+    }
+
+    public override T Accept<T>(VisitorStmt<T> visitor) {
+      return visitor.VisitBlock(this);
+    }
 }
 
 public class Expression: Stmt {
