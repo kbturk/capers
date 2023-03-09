@@ -99,6 +99,21 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return expr.value;
     }
 
+    public object VisitLogical(Logical expr) {
+        object left = evaluate(expr.left);
+
+        if (expr.oper.type == TokenType.OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            //this is the "AND" eval: basically,
+            //if the left side is false, bail out
+            //early.
+            if (!isTruthy(left)) return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
     public object VisitUnary(Unary expr) {
         object right = evaluate(expr.right);
 
@@ -128,6 +143,15 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
     public bool? VisitExpression(Expression stmt) {
         evaluate(stmt.expression);
+        return null;
+    }
+
+    public bool? VisitIf(If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
         return null;
     }
 

@@ -48,6 +48,7 @@ public class Parser {
 
     //Statement code
     private Stmt statement() {
+        if (b_match(TokenType.IF)) return ifStatement();
         if (b_match(TokenType.PRINT)) return printStatement();
         if (b_match(TokenType.LEFT_BRACE)) return new Block(block());
 
@@ -73,6 +74,20 @@ public class Parser {
         return new Print(val);
     }
 
+    private Stmt ifStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (b_match(TokenType.ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new If(condition, thenBranch, elseBranch);
+    }
+
     private Stmt expressionStatement() {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
@@ -90,7 +105,7 @@ public class Parser {
     }
 
     private Expr assignment() {
-        Expr expr = equality();
+        Expr expr = or();
 
         if (b_match(TokenType.EQUAL)) {
             Token equals = previous();
@@ -102,6 +117,30 @@ public class Parser {
             }
 
             error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expr or() {
+        Expr expr = and();
+
+        while (b_match(TokenType.OR)) {
+            Token oper = previous();
+            Expr right = and();
+            expr = new Logical(expr, oper, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = equality();
+
+        while (b_match(TokenType.AND)) {
+            Token oper = previous();
+            Expr right = equality();
+            expr = new Logical(expr, oper, right);
         }
 
         return expr;

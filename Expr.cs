@@ -8,6 +8,7 @@ public interface VisitorExpr<T> {
     public T VisitBinary(Binary e);
     public T VisitGrouping(Grouping e);
     public T VisitLiteral(Literal e);
+    public T VisitLogical(Logical e);
     public T VisitUnary(Unary e);
     public T VisitVariable(Variable e);
   }
@@ -71,6 +72,23 @@ public class Literal: Expr {
 
     public override T Accept<T>(VisitorExpr<T> visitor) {
       return visitor.VisitLiteral(this);
+    }
+}
+
+public class Logical: Expr {
+    public Expr left;
+    public Token oper;
+    public Expr right;
+
+
+    public Logical(Expr left, Token oper, Expr right) {
+      this.left = left;
+      this.oper = oper;
+      this.right = right;
+    }
+
+    public override T Accept<T>(VisitorExpr<T> visitor) {
+      return visitor.VisitLogical(this);
     }
 }
 

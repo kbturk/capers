@@ -6,6 +6,7 @@ namespace capers;
 public interface VisitorStmt<T> {
     public T VisitBlock(Block e);
     public T VisitExpression(Expression e);
+    public T VisitIf(If e);
     public T VisitPrint(Print e);
     public T VisitVar(Var e);
   }
@@ -37,6 +38,23 @@ public class Expression: Stmt {
 
     public override T Accept<T>(VisitorStmt<T> visitor) {
       return visitor.VisitExpression(this);
+    }
+}
+
+public class If: Stmt {
+    public Expr condition;
+    public Stmt thenBranch;
+    public Stmt elseBranch;
+
+
+    public If(Expr condition, Stmt thenBranch, Stmt elseBranch) {
+      this.condition = condition;
+      this.thenBranch = thenBranch;
+      this.elseBranch = elseBranch;
+    }
+
+    public override T Accept<T>(VisitorStmt<T> visitor) {
+      return visitor.VisitIf(this);
     }
 }
 

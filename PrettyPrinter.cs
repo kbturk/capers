@@ -10,6 +10,10 @@ public class PrettyPrinter: VisitorExpr<string> {
         return expr.Accept(this);
     }
 
+    public string VisitAssign(Assign expr) {
+        return expr.name.lexeme;
+    }
+
     public string VisitBinary(Binary expr) {
         return parenthesize(expr.oper.lexeme,
                 expr.left, expr.right);
@@ -24,16 +28,16 @@ public class PrettyPrinter: VisitorExpr<string> {
         return expr.value.ToString();
     }
 
+    public string VisitLogical(Logical expr) {
+        return parenthesize(expr.oper.lexeme, expr.left, expr.right);
+    }
+
     public string VisitUnary(Unary expr) {
         return parenthesize(expr.oper.lexeme, expr.right);
     }
 
     public string VisitVariable(Variable expr) {
         return expr.name.lexeme; 
-    }
-
-    public string VisitAssign(Assign expr) {
-        return expr.name.lexeme;
     }
 
     public string parenthesize(string name, params Expr[] exprs) {
