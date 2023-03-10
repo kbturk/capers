@@ -9,6 +9,7 @@ public interface VisitorStmt<T> {
     public T VisitIf(If e);
     public T VisitPrint(Print e);
     public T VisitVar(Var e);
+    public T VisitWhile(While e);
   }
 
 public abstract class Stmt {
@@ -83,6 +84,21 @@ public class Var: Stmt {
 
     public override T Accept<T>(VisitorStmt<T> visitor) {
       return visitor.VisitVar(this);
+    }
+}
+
+public class While: Stmt {
+    public Expr condition;
+    public Stmt body;
+
+
+    public While(Expr condition, Stmt body) {
+      this.condition = condition;
+      this.body = body;
+    }
+
+    public override T Accept<T>(VisitorStmt<T> visitor) {
+      return visitor.VisitWhile(this);
     }
 }
 

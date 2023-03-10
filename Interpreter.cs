@@ -19,6 +19,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         }
     }
 
+    //Visitor Patterns for Expressions
     public object VisitAssign(Assign expr) {
         object val = evaluate(expr.value);
         environment.assign(expr.name, val);
@@ -141,6 +142,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    //Visitor Patterns for Statements
     public bool? VisitExpression(Expression stmt) {
         evaluate(stmt.expression);
         return null;
@@ -168,6 +170,13 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         }
 
         environment.define(stmt.name.lexeme, val);
+        return null;
+    }
+
+    public bool? VisitWhile(While stmt) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body);
+        }
         return null;
     }
 

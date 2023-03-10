@@ -48,8 +48,10 @@ public class Parser {
 
     //Statement code
     private Stmt statement() {
+        if (b_match(TokenType.FOR)) return forStatement();
         if (b_match(TokenType.IF)) return ifStatement();
         if (b_match(TokenType.PRINT)) return printStatement();
+        if (b_match(TokenType.WHILE)) return whileStatement();
         if (b_match(TokenType.LEFT_BRACE)) return new Block(block());
 
         return expressionStatement();
@@ -68,11 +70,46 @@ public class Parser {
         return expr;
     }
 
-    private Stmt printStatement() {
-        Expr val = expression();
-        consume(TokenType.SEMICOLON, "Expect ';' after value.");
-        return new Print(val);
+    private Stmt forStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+
+        Stmt initializer;
+        if (b_match(TokenType.SEMICOLON)) {
+            initializer = null;
+        } else if (b_match(TokenType.VAR)) {
+            initializer = varDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
+
+        Expr condition = null;
+        if (!check_next(TokenType.SEMICOLON)) {
+            condition = expression();
+        }
+        consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+        Expr increment = null;
+        if (!check_next(TokenType.RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+        Stmt body = statement();
+
+        if (increment !=null) {
+            body = new Block(
+                    new List<Stmt>{body, new Expression(increment)});
+
+        }
+
+        if (condition == null) condition = new Literal(true);
+        body = new While(condition, body);
+
+        if (initializer != null) {
+            body = new Block(new List<Stmt>{initializer, body});
+        }
+        return body;
     }
+
 
     private Stmt ifStatement() {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
@@ -86,6 +123,21 @@ public class Parser {
         }
 
         return new If(condition, thenBranch, elseBranch);
+    }
+
+    private Stmt printStatement() {
+        Expr val = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Print(val);
+    }
+
+    private Stmt whileStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+        Expr condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+        Stmt body = statement();
+
+        return new While(condition, body);
     }
 
     private Stmt expressionStatement() {
