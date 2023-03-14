@@ -9,6 +9,7 @@ public interface VisitorStmt<T> {
     public T VisitFunction(Function e);
     public T VisitIf(If e);
     public T VisitPrint(Print e);
+    public T VisitReturnStmt(ReturnStmt e);
     public T VisitVar(Var e);
     public T VisitWhile(While e);
   }
@@ -87,6 +88,21 @@ public class Print: Stmt {
 
     public override T Accept<T>(VisitorStmt<T> visitor) {
       return visitor.VisitPrint(this);
+    }
+}
+
+public class ReturnStmt: Stmt {
+    public Token keyword;
+    public Expr value;
+
+
+    public ReturnStmt(Token keyword, Expr value) {
+      this.keyword = keyword;
+      this.value = value;
+    }
+
+    public override T Accept<T>(VisitorStmt<T> visitor) {
+      return visitor.VisitReturnStmt(this);
     }
 }
 

@@ -200,6 +200,13 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitReturnStmt(ReturnStmt stmt) {
+        object val = null;
+        if (stmt.value != null) val = evaluate(stmt.value);
+
+        throw new Return(val);
+    }
+
     public bool? VisitVar(Var stmt) {
         object val = null;
         if (stmt.initializer != null) {

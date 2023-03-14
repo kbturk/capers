@@ -52,6 +52,7 @@ public class Parser {
         if (b_match(TokenType.FOR)) return forStatement();
         if (b_match(TokenType.IF)) return ifStatement();
         if (b_match(TokenType.PRINT)) return printStatement();
+        if (b_match(TokenType.RETURN)) return returnStatement();
         if (b_match(TokenType.WHILE)) return whileStatement();
         if (b_match(TokenType.LEFT_BRACE)) return new Block(block());
 
@@ -131,6 +132,18 @@ public class Parser {
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new Print(val);
     }
+
+    private Stmt returnStatement() {
+        Token keyword = previous();
+        Expr val = null;
+        if (!check_next(TokenType.SEMICOLON)) {
+            val = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+        return new ReturnStmt(keyword, val);
+    }
+                
 
     private Stmt whileStatement() {
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
