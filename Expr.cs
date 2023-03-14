@@ -6,6 +6,7 @@ namespace capers;
 public interface VisitorExpr<T> {
     public T VisitAssign(Assign e);
     public T VisitBinary(Binary e);
+    public T VisitCall(Call e);
     public T VisitGrouping(Grouping e);
     public T VisitLiteral(Literal e);
     public T VisitLogical(Logical e);
@@ -46,6 +47,23 @@ public class Binary: Expr {
 
     public override T Accept<T>(VisitorExpr<T> visitor) {
       return visitor.VisitBinary(this);
+    }
+}
+
+public class Call: Expr {
+    public Expr callee;
+    public Token paren;
+    public List<Expr> arguments;
+
+
+    public Call(Expr callee, Token paren, List<Expr> arguments) {
+      this.callee = callee;
+      this.paren = paren;
+      this.arguments = arguments;
+    }
+
+    public override T Accept<T>(VisitorExpr<T> visitor) {
+      return visitor.VisitCall(this);
     }
 }
 

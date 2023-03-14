@@ -25,6 +25,7 @@ public class Parser {
 
     private Stmt declaration() {
         try {
+            if (b_match(TokenType.FUNCT)) return function("function");
             if (b_match(TokenType.VAR)) return varDeclaration();
 
             return statement();
@@ -146,6 +147,27 @@ public class Parser {
         return new Expression(expr);
     }
 
+    private Function function(string kind) {
+        Token name = consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
+        consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+        List<Token> parameters = new List<Token>();
+        if (!check_next(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.Count >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.Add(
+                        consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (b_match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body.");
+        List<Stmt> body = block();
+        return new Function(name, parameters, body);
+
+    }
+
     private List<Stmt> block() {
         List<Stmt> statements = new List<Stmt>();
 
@@ -246,7 +268,37 @@ public class Parser {
             return new Unary(oper, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new List<Expr>();
+        if (!check_next(TokenType.RIGHT_PAREN)) {
+            do {
+                if (arguments.Count >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.Add(expression());
+            } while (b_match(TokenType.COMMA));
+        }
+
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after agruments.");
+
+        return new Call(callee, paren, arguments);
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+
+        while (true) {
+            if (b_match(TokenType.LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+
+        return expr;
     }
 
     private Expr primary() {

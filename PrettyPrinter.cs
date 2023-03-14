@@ -19,6 +19,13 @@ public class PrettyPrinter: VisitorExpr<string> {
                 expr.left, expr.right);
     }
 
+    public string VisitCall(Call expr) {
+        StringBuilder builder = new StringBuilder();
+        builder.Append(expr.callee);
+        builder.Append($"({expr.arguments})");
+        return builder.ToString();
+    }
+
     public string VisitGrouping(Grouping expr){
         return parenthesize("group", expr.expression);
     }

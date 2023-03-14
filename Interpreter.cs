@@ -5,8 +5,16 @@ namespace capers;
 
 public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
-    //a dictionary to hold variables
+    //a dictionary to hold variables, starting with global values.
+    public VarEnvironment globals = new VarEnvironment();
     private VarEnvironment environment = new VarEnvironment();
+
+    public Interpreter() {
+        foreach (Builtin global in Builtin.BuiltinFunctions) {
+            environment.define(global.Name, global);
+        }
+        globals = environment;
+    }
 
     //Main API to Interpreter interface (ch 7.4)
     public void interpret(List<Stmt> statements) {
@@ -92,6 +100,29 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         throw new RuntimeError(expr.oper, "Reached an unreachable condition in Interpreter.VisitBinary");
     }
 
+    public object VisitCall(Call expr) {
+        object callee = evaluate(expr.callee);
+
+        List<object> arguments = new List<object>();
+        foreach (Expr argument in expr.arguments) {
+            arguments.Add(evaluate(argument));
+        }
+
+        if (!(callee is CapersCallable)) {
+            throw new RuntimeError(expr.paren,
+                    "Can only call functions and classes.");
+        }
+
+        CapersCallable function = (CapersCallable)callee;
+
+        if (arguments.Count != function.Arity) {
+            throw new RuntimeError(expr.paren,
+                    $"Expected {function.Arity} arguments but got {arguments.Count}.");
+        }
+
+        return function.Call(this,arguments);
+    }
+
     public object VisitGrouping(Grouping expr) {
         return evaluate(expr.expression);
     }
@@ -145,6 +176,12 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     //Visitor Patterns for Statements
     public bool? VisitExpression(Expression stmt) {
         evaluate(stmt.expression);
+        return null;
+    }
+
+    public bool? VisitFunction(Function stmt) {
+        CapersFunction function = new CapersFunction(stmt);
+        environment.define(stmt.name.lexeme, function);
         return null;
     }
 
@@ -275,7 +312,6 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         //There's some subtlety to this
         return a.Equals(b);
     }
-
 }
 
 public class RuntimeError: Exception {
