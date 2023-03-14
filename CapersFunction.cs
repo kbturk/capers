@@ -2,15 +2,17 @@ namespace capers;
 
 public class CapersFunction: CapersCallable {
     private Function declaration;
-    public CapersFunction(Function declaration) {
-        this.declaration = declaration;
-    }
+    private VarEnvironment closure;
 
+    public CapersFunction(Function declaration, VarEnvironment closure) {
+        this.declaration = declaration;
+        this.closure = closure;
+    }
     public int Arity => declaration.paramList.Count;
 
 
     public object? Call(Interpreter interpreter,List<object?> arguments) {
-        VarEnvironment environment= new VarEnvironment(interpreter.globals);
+        VarEnvironment environment= new VarEnvironment(closure);
         for (int i = 0; i < declaration.paramList.Count; i++) {
             environment.define(declaration.paramList[i].lexeme, arguments[i]);
         }

@@ -180,7 +180,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitFunction(Function stmt) {
-        CapersFunction function = new CapersFunction(stmt);
+        CapersFunction function = new CapersFunction(stmt, environment);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
