@@ -8,6 +8,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     //a dictionary to hold variables, starting with global values.
     public VarEnvironment globals = new VarEnvironment();
     private VarEnvironment environment = new VarEnvironment();
+    private Dictionary<Expr, int> locals = new Dictionary<Expr, int>();
 
     public Interpreter() {
         foreach (Builtin global in Builtin.BuiltinFunctions) {
@@ -241,6 +242,10 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
     private void execute(Stmt stmt) {
         stmt.Accept(this);
+    }
+
+    public void resolve(Expr expr, int depth) {
+        locals.Add(expr, depth);
     }
 
     public void executeBlock(List<Stmt> statements, VarEnvironment environment) {

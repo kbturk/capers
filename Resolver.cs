@@ -19,21 +19,16 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
-    public bool? VisitVar(Var stmt) {
-        declare(stmt.name);
-        if (stmt.initializer != null) {
-            resolve(stmt.initializer);
-        }
-        define(stmt.name);
-        return null;
-    }
-
-    //currently unused but declared so code compiles
     public bool? VisitExpression(Expression stmt) {
+        resolve(stmt.expression);
         return null;
     }
 
     public bool? VisitFunction(Function stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+
+        resolveFunction(stmt);
         return null;
     }
 
@@ -49,12 +44,23 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitVar(Var stmt) {
+        declare(stmt.name);
+        if (stmt.initializer != null) {
+            resolve(stmt.initializer);
+        }
+        define(stmt.name);
+        return null;
+    }
+
     public bool? VisitWhile(While stmt) {
         return null;
     }
 
     //Expr Visitor Patterns
     public bool? VisitAssign(Assign expr) {
+        resolve(expr.value);
+        resolveLocal(expr, expr.name);
         return null;
     }
 
@@ -109,6 +115,23 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         expr.Accept(this);
     }
 
+    private void resolveFunction(Function function) {
+        beginScope();
+        foreach (Token param in function.paramList) {
+            declare(param);
+            define(param);
+        }
+        resolve(function.body);
+        endScope();
+    }
+
+    private void resolveLocal(Expr expr, Token name) {
+        for (int i = scopes.Count - 1; i >= 0; i --) {
+            interpreter.resolve(expr, scopes.Count - i - i);
+            return;
+        }
+    }
+
     //using dictionaries instead of java hashmaps
     private void beginScope() {
         scopes.Push(new Dictionary<string, bool>());
@@ -129,12 +152,5 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         if (scopes.Count == 0) return;
 
         scopes.Peek().Add(name.lexeme, true);
-    }
-
-    private void resolveLocal(Expr expr, Token name) {
-        for (int i = scopes.Count - 1; i >= 0; i --) {
-            interpreter.resolve(expr, scopes.Count - i - i);
-            return;
-        }
     }
 }
