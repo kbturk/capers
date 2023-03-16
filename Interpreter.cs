@@ -257,18 +257,8 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     }
 
     //Some goofy string concatinations
-    private string stringify(object obj) {
+    private string? stringify(object obj) {
         if (obj == null) return "nil";
-
-        if (obj is double) {
-            string text = obj.ToString();
-            //TODO: This is Java's syntax for inter-valued doubles.
-            //Double check C#'s equivalent
-            if (text.EndsWith(".0")) {
-                text = text.Substring(0, text.Length - 2);
-            }
-            return text;
-        }
 
         return obj.ToString();
     }
