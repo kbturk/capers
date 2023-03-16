@@ -33,14 +33,19 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitIf(If stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.thenBranch);
+        if (stmt.elseBranch != null) resolve(stmt.elseBranch);
         return null;
     }
 
     public bool? VisitPrint(Print stmt) {
+        resolve(stmt.expression);
         return null;
     }
 
     public bool? VisitReturnStmt(ReturnStmt stmt) {
+        if (stmt.value != null) resolve(stmt.value);
         return null;
     }
 
@@ -54,6 +59,8 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitWhile(While stmt) {
+        resolve(stmt.condition);
+        resolve(stmt.body);
         return null;
     }
 
@@ -65,14 +72,23 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitBinary(Binary expr) {
+        resolve(expr.left);
+        resolve(expr.right);
         return null;
     }
 
     public bool? VisitCall(Call expr) {
+        resolve(expr.callee);
+
+        foreach (Expr argument in expr.arguments) {
+            resolve(argument);
+        }
+
         return null;
     }
 
     public bool? VisitGrouping(Grouping expr) {
+        resolve(expr.expression);
         return null;
     }
 
@@ -81,10 +97,13 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitLogical(Logical expr) {
+        resolve(expr.right);
+        resolve(expr.left);
         return null;
     }
 
     public bool? VisitUnary(Unary expr) {
+        resolve(expr.right);
         return null;
     }
 
