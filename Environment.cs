@@ -44,4 +44,17 @@ public class VarEnvironment {
     public void define(string name, object val) {
             values.Add(name, val);
     }
+
+    public object getAt(int distance, string name) {
+        return ancestor(distance).values[name];
+    }
+
+    public VarEnvironment ancestor(int distance) {
+        VarEnvironment environment = this;
+        for (int i = 0; i < distance; i ++) {
+            environment = environment.enclosing;
+        }
+
+        return environment;
+    }
 }

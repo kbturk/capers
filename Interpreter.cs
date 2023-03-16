@@ -166,15 +166,23 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     }
 
     public object VisitVariable(Variable expr) {
-        return environment.get(expr.name);
+        return lookUpVariable(expr.name, expr);
     }
 
+   public object lookUpVariable(Token name, Expr expr) {
+       if (locals.ContainsKey(expr)) {
+           return environment.getAt(locals[expr], name.lexeme);
+       } else {
+           return globals.get(name);
+       }
+   }
+
+    //Visitor Patterns for Statements
     public bool? VisitBlock(Block stmt) {
         executeBlock(stmt.statements, new VarEnvironment(environment));
         return null;
     }
 
-    //Visitor Patterns for Statements
     public bool? VisitExpression(Expression stmt) {
         evaluate(stmt.expression);
         return null;
