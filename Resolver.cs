@@ -3,15 +3,19 @@ using System;
 
 namespace capers;
 
-
-
 public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     private Interpreter interpreter;
     private Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
-        
+    private FunctionType currentFunction = FunctionType.NO; 
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
+    }
+
+    //Private enums?
+    private enum FunctionType {
+        NO,
+        YES
     }
 
     //Stmt Visitor Patterns
@@ -31,7 +35,7 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         declare(stmt.name);
         define(stmt.name);
 
-        resolveFunction(stmt);
+        resolveFunction(stmt, FunctionType.YES);
         return null;
     }
 
@@ -48,6 +52,9 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitReturnStmt(ReturnStmt stmt) {
+        if (currentFunction == FunctionType.NO) {
+            Capers.error(stmt.keyword, "Can't return from top-level code.");
+        }
         if (stmt.value != null) resolve(stmt.value);
         return null;
     }
@@ -147,7 +154,9 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         expr.Accept(this);
     }
 
-    private void resolveFunction(Function function) {
+    private void resolveFunction(Function function, FunctionType type) {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = type;
         beginScope();
         foreach (Token param in function.paramList) {
             declare(param);
@@ -155,6 +164,7 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         }
         resolve(function.body);
         endScope();
+        currentFunction = enclosingFunction;
     }
 
     private void resolveLocal(Expr expr, Token name) {
