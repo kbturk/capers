@@ -3,9 +3,12 @@ using System;
 
 namespace capers;
 
+
+
 public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     private Interpreter interpreter;
     private Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
+        
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -108,9 +111,19 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitVariable(Variable expr) {
-        if (!(scopes.Count == 0) &&
-                scopes.Peek()[expr.name.lexeme] == false) {
-            Capers.error(expr.name, "Can't read local variable in its own initializer.");
+
+        if (!(scopes.Count == 0)) {
+            //Troubleshooting code
+            //Console.WriteLine($"Count: {scopes.Count}");
+//          foreach (Dictionary<string, bool> scope in scopes) {
+//              foreach ((string key, bool val) in scope) {
+//                  Console.WriteLine($"{key}:{val}");
+//              }
+//          }
+            if (scopes.Peek().ContainsKey(expr.name.lexeme) &&
+                        scopes.Peek()[expr.name.lexeme] == false) {
+                Capers.error(expr.name, "Can't read local variable in its own initializer.");
+            }
         }
 
         resolveLocal(expr, expr.name);
@@ -120,7 +133,7 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     //Private helper functions
 
     //Resolve overload functions
-    private void resolve(List<Stmt> statements) {
+    public void resolve(List<Stmt> statements) {
         foreach (Stmt statement in statements) {
             resolve(statement);
         }
@@ -145,9 +158,15 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     private void resolveLocal(Expr expr, Token name) {
-        for (int i = scopes.Count - 1; i >= 0; i --) {
-            interpreter.resolve(expr, scopes.Count - i - i);
-            return;
+        var i = 0;
+        foreach (Dictionary<string, bool> stack in scopes) {
+            if (stack.ContainsKey(name.lexeme)){
+                //Temp code:
+                //Console.WriteLine($"sending {name.lexeme} : {stack[name.lexeme]} to resolver with i: {i}");
+                interpreter.resolve(expr,i);
+                return;
+            }
+            i++;
         }
     }
 
@@ -164,12 +183,15 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         if (scopes.Count == 0) return;
 
         Dictionary<string, bool> scope = scopes.Peek();
+        if (scope.ContainsKey(name.lexeme)) {
+            Capers.error(name,
+                    "There is already a variable with this name in this scope.");
+        }
         scope.Add(name.lexeme, false);
     }
 
     private void define(Token name) {
         if (scopes.Count == 0) return;
-
-        scopes.Peek().Add(name.lexeme, true);
+        scopes.Peek()[name.lexeme] = true;
     }
 }

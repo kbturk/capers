@@ -31,7 +31,13 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     //Visitor Patterns for Expressions
     public object VisitAssign(Assign expr) {
         object val = evaluate(expr.value);
-        environment.assign(expr.name, val);
+
+        if (locals.ContainsKey(expr)) {
+            int distance = locals[expr];
+            environment.assignAt(distance, expr.name, val);
+        } else {
+            globals.assign(expr.name, val);
+        }
         return val;
     }
 
@@ -169,13 +175,15 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return lookUpVariable(expr.name, expr);
     }
 
-   public object lookUpVariable(Token name, Expr expr) {
-       if (locals.ContainsKey(expr)) {
-           return environment.getAt(locals[expr], name.lexeme);
-       } else {
-           return globals.get(name);
-       }
-   }
+    public object lookUpVariable(Token name, Expr expr) {
+        if (locals.ContainsKey(expr)) {
+            //Console.WriteLine($"in lookUpVariable, sending {expr}, {name.lexeme}, {locals[expr]} to getAt");
+            return environment.getAt(locals[expr], name.lexeme);
+        } else {
+            //Console.WriteLine($"locals did not contain {expr}, so sending {name.lexeme} to globals.get");
+            return globals.get(name);
+        }
+    }
 
     //Visitor Patterns for Statements
     public bool? VisitBlock(Block stmt) {

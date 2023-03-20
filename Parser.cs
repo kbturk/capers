@@ -340,7 +340,6 @@ public class Parser {
         }
         throw error(peek(), "Expected expression.");
 
-        return new Literal(null);//TODO: remove. This is a placeholder
     }
 
     //A collection of simple functions
