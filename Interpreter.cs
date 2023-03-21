@@ -301,7 +301,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     private static string ValueString(object? val) => val switch
     {
         null => "nil",
-             true => "true - true",
+             true => "he speaks the true - true",
              false => "falsey",
              double d => d.ToString(),
              string s => $"\"{s}\"",
