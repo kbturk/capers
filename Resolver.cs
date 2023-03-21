@@ -26,6 +26,12 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitClass(Class stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+        return null;
+    }
+
     public bool? VisitExpression(Expression stmt) {
         resolve(stmt.expression);
         return null;

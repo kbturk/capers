@@ -25,6 +25,7 @@ public class Parser {
 
     private Stmt declaration() {
         try {
+            if (b_match(TokenType.CLASS)) return classDeclaration();
             if (b_match(TokenType.FUNCT)) return function("function");
             if (b_match(TokenType.VAR)) return varDeclaration();
 
@@ -33,6 +34,41 @@ public class Parser {
             synchronize();
             return null;
         }
+    }
+
+    private Stmt classDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Function> methods = new List<Function>();
+        while (!check_next(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            methods.Add(function("method"));
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Class(name, methods);
+    }
+
+    private Function function(string kind) {
+        Token name = consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
+        consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+        List<Token> parameters = new List<Token>();
+        if (!check_next(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.Count >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.Add(
+                        consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (b_match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body.");
+        List<Stmt> body = block();
+        return new Function(name, parameters, body);
+
     }
 
     private Stmt varDeclaration() {
@@ -158,27 +194,6 @@ public class Parser {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new Expression(expr);
-    }
-
-    private Function function(string kind) {
-        Token name = consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
-        consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
-        List<Token> parameters = new List<Token>();
-        if (!check_next(TokenType.RIGHT_PAREN)) {
-            do {
-                if (parameters.Count >= 255) {
-                    error(peek(), "Can't have more than 255 parameters.");
-                }
-
-                parameters.Add(
-                        consume(TokenType.IDENTIFIER, "Expect parameter name."));
-            } while (b_match(TokenType.COMMA));
-        }
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
-        consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body.");
-        List<Stmt> body = block();
-        return new Function(name, parameters, body);
-
     }
 
     private List<Stmt> block() {

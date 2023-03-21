@@ -14,6 +14,13 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         foreach (Builtin global in Builtin.BuiltinFunctions) {
             environment.define(global.Name, global);
         }
+        environment.define("print_string",new Builtin("print_string",1,
+                    (args) => {
+                    Console.WriteLine(ValueString(args[0]));
+                    return null;
+                    }
+                    )
+                );
         globals = environment;
     }
 
@@ -191,6 +198,12 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitClass(Class stmt) {
+        CapersClass klass = new CapersClass(stmt.name.lexeme);
+        environment.define(stmt.name.lexeme, klass);
+        return null;
+    }
+
     public bool? VisitExpression(Expression stmt) {
         evaluate(stmt.expression);
         return null;
@@ -283,6 +296,18 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
         return obj.ToString();
     }
+
+    //a little more useful string function
+    private static string ValueString(object? val) => val switch
+    {
+        null => "nil",
+             true => "true - true",
+             false => "falsey",
+             double d => d.ToString(),
+             string s => $"\"{s}\"",
+             _ => throw new RuntimeError(val, "invalid runtime value")
+    };
+
 
     //custom capers string helper functions
     //example: 3 * "dog" or "dog" * 3 = "dogdogdog" 

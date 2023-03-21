@@ -5,6 +5,7 @@ namespace capers;
 
 public interface VisitorStmt<T> {
     public T VisitBlock(Block e);
+    public T VisitClass(Class e);
     public T VisitExpression(Expression e);
     public T VisitFunction(Function e);
     public T VisitIf(If e);
@@ -28,6 +29,21 @@ public class Block: Stmt {
 
     public override T Accept<T>(VisitorStmt<T> visitor) {
       return visitor.VisitBlock(this);
+    }
+}
+
+public class Class: Stmt {
+    public Token name;
+    public List<Function> methods;
+
+
+    public Class(Token name, List<Function> methods) {
+      this.name = name;
+      this.methods = methods;
+    }
+
+    public override T Accept<T>(VisitorStmt<T> visitor) {
+      return visitor.VisitClass(this);
     }
 }
 
