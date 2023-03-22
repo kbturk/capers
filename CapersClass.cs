@@ -21,9 +21,26 @@ public class CapersClass: CapersCallable {
 
 public class CapersInstance {
     private CapersClass klass;
+    private Dictionary<string, object> fields = new Dictionary<string, object>();
 
     public CapersInstance(CapersClass klass) {
         this.klass = klass;
+    }
+
+    public object get(Token name) {
+        if (fields.ContainsKey(name.lexeme)) {
+            return fields[name.lexeme];
+        }
+
+        throw new RuntimeError(name, $"Undefined property '{name.lexeme}'.");
+    }
+
+    public void set(Token name, object val) {
+        if (fields.ContainsKey(name.lexeme)) {
+            fields[name.lexeme] = val;
+        } else {
+            fields.Add(name.lexeme, val);
+        }
     }
 
     public override string ToString() {

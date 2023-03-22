@@ -103,6 +103,11 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitGet(Get expr) {
+        resolve(expr.obj);
+        return null;
+    }
+
     public bool? VisitGrouping(Grouping expr) {
         resolve(expr.expression);
         return null;
@@ -118,6 +123,12 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitSet(Set expr) {
+        resolve(expr.value);
+        resolve(expr.obj);
+        return null;
+    }
+
     public bool? VisitUnary(Unary expr) {
         resolve(expr.right);
         return null;
@@ -126,13 +137,6 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     public bool? VisitVariable(Variable expr) {
 
         if (!(scopes.Count == 0)) {
-            //Troubleshooting code
-            //Console.WriteLine($"Count: {scopes.Count}");
-//          foreach (Dictionary<string, bool> scope in scopes) {
-//              foreach ((string key, bool val) in scope) {
-//                  Console.WriteLine($"{key}:{val}");
-//              }
-//          }
             if (scopes.Peek().ContainsKey(expr.name.lexeme) &&
                         scopes.Peek()[expr.name.lexeme] == false) {
                 Capers.error(expr.name, "Can't read local variable in its own initializer.");

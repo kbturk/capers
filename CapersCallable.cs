@@ -6,7 +6,6 @@ public interface CapersCallable {
 }
 
 //New globals go here
-//TODO: Make a print builtin,
 //TODO: make a builtin that prints all variables in the environments.
 internal record class Builtin(string Name, int Arity, Func<List<object?>, object?> Function): CapersCallable {
     public object? Call(Interpreter interpreter, List<object?> arguments) => Function(arguments);

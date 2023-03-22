@@ -216,6 +216,9 @@ public class Parser {
             if (expr is Variable) {
                 Token name = ((Variable)expr).name;
                 return new Assign(name, val);
+            } else if (expr is Get) {
+                Get get = (Get)expr;
+                return new Set(get.obj, get.name, val);
             }
 
             error(equals, "Invalid assignment target.");
@@ -321,6 +324,9 @@ public class Parser {
         while (true) {
             if (b_match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (b_match(TokenType.DOT)){
+                Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new Get(expr, name);
             } else {
                 break;
             }

@@ -26,6 +26,10 @@ public class PrettyPrinter: VisitorExpr<string> {
         return builder.ToString();
     }
 
+    public string VisitGet(Get expr){
+        return $"{expr.Accept(this)}[{expr.name.lexeme}]";
+    }
+
     public string VisitGrouping(Grouping expr){
         return parenthesize("group", expr.expression);
     }
@@ -37,6 +41,10 @@ public class PrettyPrinter: VisitorExpr<string> {
 
     public string VisitLogical(Logical expr) {
         return parenthesize(expr.oper.lexeme, expr.left, expr.right);
+    }
+
+    public string VisitSet(Set expr) {
+        return $"{expr.obj.ToString()} = {expr.Accept(this)}";
     }
 
     public string VisitUnary(Unary expr) {

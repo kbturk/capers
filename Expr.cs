@@ -7,9 +7,11 @@ public interface VisitorExpr<T> {
     public T VisitAssign(Assign e);
     public T VisitBinary(Binary e);
     public T VisitCall(Call e);
+    public T VisitGet(Get e);
     public T VisitGrouping(Grouping e);
     public T VisitLiteral(Literal e);
     public T VisitLogical(Logical e);
+    public T VisitSet(Set e);
     public T VisitUnary(Unary e);
     public T VisitVariable(Variable e);
   }
@@ -67,6 +69,21 @@ public class Call: Expr {
     }
 }
 
+public class Get: Expr {
+    public Expr obj;
+    public Token name;
+
+
+    public Get(Expr obj, Token name) {
+      this.obj = obj;
+      this.name = name;
+    }
+
+    public override T Accept<T>(VisitorExpr<T> visitor) {
+      return visitor.VisitGet(this);
+    }
+}
+
 public class Grouping: Expr {
     public Expr expression;
 
@@ -107,6 +124,23 @@ public class Logical: Expr {
 
     public override T Accept<T>(VisitorExpr<T> visitor) {
       return visitor.VisitLogical(this);
+    }
+}
+
+public class Set: Expr {
+    public Expr obj;
+    public Token name;
+    public Expr value;
+
+
+    public Set(Expr obj, Token name, Expr value) {
+      this.obj = obj;
+      this.name = name;
+      this.value = value;
+    }
+
+    public override T Accept<T>(VisitorExpr<T> visitor) {
+      return visitor.VisitSet(this);
     }
 }
 

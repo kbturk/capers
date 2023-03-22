@@ -137,6 +137,15 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return function.Call(this,arguments);
     }
 
+    public object VisitGet(Get expr) {
+        object obj = evaluate(expr.obj);
+        if (obj is CapersInstance) {
+            return ((CapersInstance) obj).get(expr.name);
+        }
+
+        throw new RuntimeError(expr.name, "Only instances have properties.");
+    }
+
     public object VisitGrouping(Grouping expr) {
         return evaluate(expr.expression);
     }
@@ -158,6 +167,18 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         }
 
         return evaluate(expr.right);
+    }
+
+    public object VisitSet(Set expr) {
+        object obj = evaluate(expr.obj);
+
+        if (!(obj is CapersInstance)) {
+            throw new RuntimeError(expr.name, "Only instances have fields.");
+        }
+
+        object val = evaluate(expr.value);
+        ((CapersInstance)obj).set(expr.name, val);
+        return val;
     }
 
     public object VisitUnary(Unary expr) {
