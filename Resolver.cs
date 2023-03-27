@@ -15,7 +15,8 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     //Private enums?
     private enum FunctionType {
         NO,
-        YES
+        YES,
+        METHOD
     }
 
     //Stmt Visitor Patterns
@@ -29,6 +30,11 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     public bool? VisitClass(Class stmt) {
         declare(stmt.name);
         define(stmt.name);
+
+        foreach (Function method in stmt.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            resolveFunction(method, declaration);
+        }
         return null;
     }
 

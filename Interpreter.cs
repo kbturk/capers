@@ -205,10 +205,8 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
     public object lookUpVariable(Token name, Expr expr) {
         if (locals.ContainsKey(expr)) {
-            //Console.WriteLine($"in lookUpVariable, sending {expr}, {name.lexeme}, {locals[expr]} to getAt");
             return environment.getAt(locals[expr], name.lexeme);
         } else {
-            //Console.WriteLine($"locals did not contain {expr}, so sending {name.lexeme} to globals.get");
             return globals.get(name);
         }
     }
@@ -220,8 +218,15 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitClass(Class stmt) {
-        CapersClass klass = new CapersClass(stmt.name.lexeme);
-        environment.define(stmt.name.lexeme, klass);
+        environment.define(stmt.name.lexeme, null);
+
+        Dictionary<string, CapersFunction> methods = new Dictionary<string, CapersFunction>();
+        foreach (Function method in stmt.methods) {
+            CapersFunction function = new CapersFunction(method, environment);
+            methods.Add(method.name.lexeme, function);
+        }
+        CapersClass klass = new CapersClass(stmt.name.lexeme, methods);
+        environment.assign(stmt.name, klass);
         return null;
     }
 
