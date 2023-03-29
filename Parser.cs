@@ -350,6 +350,9 @@ public class Parser {
             case TokenType.STRING:
                 advance();
                 return new Literal(previous().literal);
+            case TokenType.THIS:
+                advance();
+                return new This(previous());
             case TokenType.IDENTIFIER:
                 advance();
                 return new Variable(previous());

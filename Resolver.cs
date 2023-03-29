@@ -6,7 +6,13 @@ namespace capers;
 public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     private Interpreter interpreter;
     private Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
-    private FunctionType currentFunction = FunctionType.NO; 
+    private FunctionType currentFunction = FunctionType.NO;
+    private enum ClassType {
+        NONE,
+        CLASS
+    }
+
+    private ClassType currentClass = ClassType.NONE;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -16,6 +22,7 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     private enum FunctionType {
         NO,
         YES,
+        INITIALIZER,
         METHOD
     }
 
@@ -28,13 +35,30 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitClass(Class stmt) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         declare(stmt.name);
         define(stmt.name);
 
+        beginScope();
+        if (scopes.Peek().ContainsKey("this")) {
+            scopes.Peek()["this"] = true;
+        } else {
+            scopes.Peek().Add("this", true);
+        }
+
         foreach (Function method in stmt.methods) {
             FunctionType declaration = FunctionType.METHOD;
+            if (method.name.lexeme == "init") {
+                declaration = FunctionType.INITIALIZER;
+            }
             resolveFunction(method, declaration);
         }
+
+        endScope();
+        currentClass = enclosingClass;
+
         return null;
     }
 
@@ -67,7 +91,13 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         if (currentFunction == FunctionType.NO) {
             Capers.error(stmt.keyword, "Can't return from top-level code.");
         }
-        if (stmt.value != null) resolve(stmt.value);
+        if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                Capers.error(stmt.keyword,
+                        "Can't return a value from an initializer");
+            }
+            resolve(stmt.value);
+        }
         return null;
     }
 
@@ -135,6 +165,16 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         return null;
     }
 
+    public bool? VisitThis(This expr) {
+        if (currentClass == ClassType.NONE) {
+            Capers.error(expr.keyword,
+                    "Can't use 'this' outside of a class.");
+            return null;
+        }
+        resolveLocal(expr, expr.keyword);
+        return null;
+    }
+
     public bool? VisitUnary(Unary expr) {
         resolve(expr.right);
         return null;
@@ -187,8 +227,6 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         var i = 0;
         foreach (Dictionary<string, bool> stack in scopes) {
             if (stack.ContainsKey(name.lexeme)){
-                //Temp code:
-                //Console.WriteLine($"sending {name.lexeme} : {stack[name.lexeme]} to resolver with i: {i}");
                 interpreter.resolve(expr,i);
                 return;
             }

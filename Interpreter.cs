@@ -181,6 +181,10 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return val;
     }
 
+    public object VisitThis(This expr) {
+        return lookUpVariable(expr.keyword, expr);
+    }
+
     public object VisitUnary(Unary expr) {
         object right = evaluate(expr.right);
 
@@ -222,7 +226,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
         Dictionary<string, CapersFunction> methods = new Dictionary<string, CapersFunction>();
         foreach (Function method in stmt.methods) {
-            CapersFunction function = new CapersFunction(method, environment);
+            CapersFunction function = new CapersFunction(method, environment, method.name.lexeme == "init");
             methods.Add(method.name.lexeme, function);
         }
         CapersClass klass = new CapersClass(stmt.name.lexeme, methods);
@@ -236,7 +240,7 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitFunction(Function stmt) {
-        CapersFunction function = new CapersFunction(stmt, environment);
+        CapersFunction function = new CapersFunction(stmt, environment, false);
         environment.define(stmt.name.lexeme, function);
         return null;
     }

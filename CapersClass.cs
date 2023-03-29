@@ -3,7 +3,7 @@ namespace capers;
 public class CapersClass: CapersCallable {
     public string name;
     private Dictionary<string, CapersFunction> methods;
-    public int Arity {get;} = 0;
+    public int Arity {get;set;}
 
     public CapersClass(string name, Dictionary<string, CapersFunction>
             methods) {
@@ -25,6 +25,17 @@ public class CapersClass: CapersCallable {
 
     public object? Call(Interpreter interpreter, List<object?> arguments) {
         CapersInstance instance = new CapersInstance(this);
+        CapersFunction initializer = findMethod("init");
+        if (initializer != null) {
+            initializer.bind(instance).Call(interpreter, arguments);
+        }
+
+        if (initializer == null) {
+            Arity = 0;
+        } else {
+            Arity = arguments.Count;
+        }
+
         return instance;
     }
 
@@ -44,7 +55,7 @@ public class CapersInstance {
         }
 
         CapersFunction method = klass.findMethod(name.lexeme);
-        if (method != null) return method;
+        if (method != null) return method.bind(this);
 
         throw new RuntimeError(name, $"Undefined property '{name.lexeme}'.");
     }

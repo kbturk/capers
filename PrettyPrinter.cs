@@ -47,6 +47,10 @@ public class PrettyPrinter: VisitorExpr<string> {
         return $"{expr.obj.ToString()} = {expr.Accept(this)}";
     }
 
+    public string VisitThis(This expr) {
+        return $"this is a weird thing to ask to print but whatever: {expr}";
+    }
+
     public string VisitUnary(Unary expr) {
         return parenthesize(expr.oper.lexeme, expr.right);
     }
