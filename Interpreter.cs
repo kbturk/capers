@@ -238,7 +238,8 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
             CapersFunction function = new CapersFunction(method, environment, method.name.lexeme == "init");
             methods.Add(method.name.lexeme, function);
         }
-        CapersClass klass = new CapersClass(stmt.name.lexeme, methods);
+        CapersClass klass = new CapersClass(stmt.name.lexeme,
+                (CapersClass?)superclass, methods);
         environment.assign(stmt.name, klass);
         return null;
     }

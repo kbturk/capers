@@ -1,12 +1,14 @@
 namespace capers;
 
 public class CapersClass: CapersCallable {
+    public CapersClass? superclass;
     public string name;
     private Dictionary<string, CapersFunction> methods;
     public int Arity {get;set;}
 
-    public CapersClass(string name, Dictionary<string, CapersFunction>
-            methods) {
+    public CapersClass(string name, CapersClass? superclass,
+            Dictionary<string, CapersFunction> methods) {
+        this.superclass = superclass;
         this.name = name;
         this.methods = methods;
     }
@@ -14,6 +16,10 @@ public class CapersClass: CapersCallable {
     public CapersFunction? findMethod(string name) {
         if (methods.ContainsKey(name)) {
             return methods[name];
+        }
+
+        if (superclass != null) {
+            return superclass.findMethod(name);
         }
 
         return null;
