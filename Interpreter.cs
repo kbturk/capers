@@ -222,6 +222,15 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
     }
 
     public bool? VisitClass(Class stmt) {
+        object superclass = null;
+        if (stmt.superclass != null) {
+            superclass = evaluate(stmt.superclass);
+            if(!(superclass is CapersClass)) {
+                throw new RuntimeError(stmt.superclass.name,
+                        "Superclass must be a class.");
+            }
+        }
+
         environment.define(stmt.name.lexeme, null);
 
         Dictionary<string, CapersFunction> methods = new Dictionary<string, CapersFunction>();

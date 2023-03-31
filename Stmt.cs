@@ -34,11 +34,13 @@ public class Block: Stmt {
 
 public class Class: Stmt {
     public Token name;
+    public Variable superclass;
     public List<Function> methods;
 
 
-    public Class(Token name, List<Function> methods) {
+    public Class(Token name, Variable superclass, List<Function> methods) {
       this.name = name;
+      this.superclass = superclass;
       this.methods = methods;
     }
 

@@ -41,6 +41,16 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         declare(stmt.name);
         define(stmt.name);
 
+        if (stmt.superclass != null && 
+                stmt.name.lexeme == stmt.superclass.name.lexeme) {
+            Capers.error(stmt.superclass.name,
+                    "A class can't inherit from itself.");
+        }
+
+        if (stmt.superclass != null) {
+            resolve(stmt.superclass);
+        }
+
         beginScope();
         if (scopes.Peek().ContainsKey("this")) {
             scopes.Peek()["this"] = true;
@@ -184,7 +194,7 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
 
         if (!(scopes.Count == 0)) {
             if (scopes.Peek().ContainsKey(expr.name.lexeme) &&
-                        scopes.Peek()[expr.name.lexeme] == false) {
+                    scopes.Peek()[expr.name.lexeme] == false) {
                 Capers.error(expr.name, "Can't read local variable in its own initializer.");
             }
         }
