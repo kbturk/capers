@@ -9,7 +9,8 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     private FunctionType currentFunction = FunctionType.NO;
     private enum ClassType {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
 
     private ClassType currentClass = ClassType.NONE;
@@ -48,7 +49,13 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         }
 
         if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS;
             resolve(stmt.superclass);
+        }
+
+        if (stmt.superclass != null) {
+            beginScope();
+            scopes.Peek().Add("super", true);
         }
 
         beginScope();
@@ -67,6 +74,9 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
         }
 
         endScope();
+
+        if (stmt.superclass != null) endScope();
+
         currentClass = enclosingClass;
 
         return null;
@@ -172,6 +182,18 @@ public class Resolver: VisitorExpr<Nullable<bool>>, VisitorStmt<Nullable<bool>>{
     public bool? VisitSet(Set expr) {
         resolve(expr.value);
         resolve(expr.obj);
+        return null;
+    }
+
+    public bool? VisitSuper(Super expr) {
+        if (currentClass == ClassType.NONE) {
+            Capers.error(expr.keyword, "Can't use 'super' outside of a class.");
+        } else if (currentClass != ClassType.SUBCLASS) {
+            Capers.error(expr.keyword,
+                    "Can't use 'super' in a class with no superclass.");
+        }
+
+        resolveLocal(expr, expr.keyword);
         return null;
     }
 

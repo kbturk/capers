@@ -357,6 +357,13 @@ public class Parser {
             case TokenType.STRING:
                 advance();
                 return new Literal(previous().literal);
+            case TokenType.SUPER:
+                advance();
+                Token keyword = previous();
+                consume(TokenType.DOT, "Expect '.' after 'super'.");
+                Token method = consume(TokenType.IDENTIFIER,
+                        "Expect superclass method name.");
+                return new Super(keyword, method);
             case TokenType.THIS:
                 advance();
                 return new This(previous());

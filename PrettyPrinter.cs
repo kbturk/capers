@@ -47,6 +47,10 @@ public class PrettyPrinter: VisitorExpr<string> {
         return $"{expr.obj.ToString()} = {expr.Accept(this)}";
     }
 
+    public string VisitSuper(Super expr) {
+        return $"this is a weird thing to ask to print but whatever: {expr}";
+    }
+
     public string VisitThis(This expr) {
         return $"this is a weird thing to ask to print but whatever: {expr}";
     }

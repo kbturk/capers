@@ -181,6 +181,24 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
         return val;
     }
 
+    public object VisitSuper(Super expr) {
+        int distance = locals[expr];
+        CapersClass superclass = (CapersClass)environment.getAt(
+                distance, "super");
+
+        CapersInstance obj = (CapersInstance)environment.getAt(
+                distance - 1, "this");
+
+        CapersFunction method = superclass.findMethod(expr.method.lexeme);
+
+        if (method == null) {
+            throw new RuntimeError(expr.method,
+                    $"Undefined property '{expr.method.lexeme}'.");
+        }
+
+        return method.bind(obj);
+    }
+
     public object VisitThis(This expr) {
         return lookUpVariable(expr.keyword, expr);
     }
@@ -233,13 +251,26 @@ public class Interpreter: VisitorExpr<object>, VisitorStmt<Nullable<bool>>{
 
         environment.define(stmt.name.lexeme, null);
 
-        Dictionary<string, CapersFunction> methods = new Dictionary<string, CapersFunction>();
+        if (stmt.superclass != null) {
+            environment = new VarEnvironment(environment);
+            environment.define("super", superclass);
+        }
+
+        Dictionary<string, CapersFunction> methods =
+            new Dictionary<string, CapersFunction>();
+
         foreach (Function method in stmt.methods) {
             CapersFunction function = new CapersFunction(method, environment, method.name.lexeme == "init");
             methods.Add(method.name.lexeme, function);
         }
+
         CapersClass klass = new CapersClass(stmt.name.lexeme,
                 (CapersClass?)superclass, methods);
+
+        if (superclass != null) {
+            environment = environment.enclosing;
+        }
+
         environment.assign(stmt.name, klass);
         return null;
     }

@@ -12,6 +12,7 @@ public interface VisitorExpr<T> {
     public T VisitLiteral(Literal e);
     public T VisitLogical(Logical e);
     public T VisitSet(Set e);
+    public T VisitSuper(Super e);
     public T VisitThis(This e);
     public T VisitUnary(Unary e);
     public T VisitVariable(Variable e);
@@ -142,6 +143,21 @@ public class Set: Expr {
 
     public override T Accept<T>(VisitorExpr<T> visitor) {
       return visitor.VisitSet(this);
+    }
+}
+
+public class Super: Expr {
+    public Token keyword;
+    public Token method;
+
+
+    public Super(Token keyword, Token method) {
+      this.keyword = keyword;
+      this.method = method;
+    }
+
+    public override T Accept<T>(VisitorExpr<T> visitor) {
+      return visitor.VisitSuper(this);
     }
 }
 
